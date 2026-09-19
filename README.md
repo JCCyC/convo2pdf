@@ -82,4 +82,4 @@ Tests use a synthetic transcript in `tests/sample.jsonl`. The CLI tests are skip
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+GPLv3. See [LICENSE](LICENSE).
