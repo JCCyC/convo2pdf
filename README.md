@@ -28,6 +28,19 @@ git clone <this-repo-url> ~/.claude/skills/convo2pdf
 
 Start a new Claude Code session (or reload skills) and `/convo2pdf` will be available in every project.
 
+### Installing pandoc
+
+pandoc converts the transcript to HTML before the PDF step, so the skill won't run without it. Install it with your package manager:
+
+```bash
+sudo apt install pandoc      # Debian, Ubuntu
+sudo dnf install pandoc      # Fedora
+sudo pacman -S pandoc        # Arch
+brew install pandoc          # macOS (Homebrew)
+```
+
+Other platforms and standalone installers are listed on the [pandoc install page](https://pandoc.org/installing.html). Check that it works with `pandoc --version`.
+
 ## Usage
 
 ```
