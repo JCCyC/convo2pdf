@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+.DS_Store
+.idea/
+.vscode/
+
+# Exports produced by /convo2pdf when run from inside this repo
+convo-*.pdf
+convo-*.md

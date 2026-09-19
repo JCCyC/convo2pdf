@@ -1,0 +1,54 @@
+import subprocess, sys, unittest, tempfile, shutil
+from pathlib import Path
+
+HERE = Path(__file__).parent
+sys.path.insert(0, str(HERE.parent))
+import convo2pdf as c  # noqa: E402
+
+SAMPLE = HERE / "sample.jsonl"
+SCRIPT = HERE.parent / "convo2pdf.py"
+
+
+class ParseTests(unittest.TestCase):
+    def test_default_hides_noise_thinking_tools_and_sidechains(self):
+        turns, title, ts = c.parse(SAMPLE, tools=False, thinking=False)
+        text = c.to_markdown(turns, title, ts, SAMPLE)
+        self.assertEqual(title, "Sample chat")
+        self.assertIn("How do I list files?", text)
+        for hidden in ("secret/path.py", "hidden", "pondering", "ls -la", "file1", "SIDECHAIN"):
+            self.assertNotIn(hidden, text)
+
+    def test_tools_and_thinking_flags(self):
+        turns, title, ts = c.parse(SAMPLE, tools=True, thinking=True)
+        text = c.to_markdown(turns, title, ts, SAMPLE)
+        for shown in ("pondering", "ls -la", "file1"):
+            self.assertIn(shown, text)
+
+    def test_html_has_csp_and_table(self):
+        turns, title, ts = c.parse(SAMPLE, False, False)
+        html = c.render(turns, title, ts, SAMPLE)
+        self.assertIn("Content-Security-Policy", html)
+        self.assertIn("<table>", html)
+
+
+@unittest.skipUnless(shutil.which("pandoc") and c.find_browser(), "needs pandoc and Chromium/Chrome")
+class CliTests(unittest.TestCase):
+    def run_cli(self, cwd, *args):
+        return subprocess.run([sys.executable, str(SCRIPT), "--file", str(SAMPLE), *args],
+                              cwd=cwd, capture_output=True, text=True)
+
+    def test_writes_pdf_and_md_and_refuses_to_overwrite(self):
+        with tempfile.TemporaryDirectory() as d:
+            r = self.run_cli(d, "my", "chat.pdf")
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertTrue((Path(d) / "my chat.pdf").read_bytes().startswith(b"%PDF"))
+            self.assertTrue((Path(d) / "my chat.md").exists())
+            before = (Path(d) / "my chat.md").read_text()
+            r = self.run_cli(d, "my chat")
+            self.assertNotEqual(r.returncode, 0)
+            self.assertIn("already exist", r.stderr)
+            self.assertEqual((Path(d) / "my chat.md").read_text(), before)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,8 @@
+{"type": "ai-title", "aiTitle": "Sample chat"}
+{"type": "user", "timestamp": "2026-01-02T03:04:05Z", "message": {"role": "user", "content": [{"type": "text", "text": "<ide_opened_file>secret/path.py</ide_opened_file>"}, {"type": "text", "text": "How do I list files?<system-reminder>hidden</system-reminder>"}]}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "thinking", "thinking": "pondering"}]}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "Use `ls`.\n\n| a | b |\n|---|---|\n| 1 | 2 |"}]}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "tool_use", "id": "t1", "name": "Bash", "input": {"command": "ls -la"}}]}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "t1", "content": "file1\nfile2"}]}}
+{"type": "assistant", "isSidechain": true, "message": {"role": "assistant", "content": [{"type": "text", "text": "SIDECHAIN"}]}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "<script>alert(1)</script> Done."}]}}
