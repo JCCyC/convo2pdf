@@ -14,7 +14,7 @@ It reads the session transcript Claude Code already keeps on disk, so nothing is
 - Claude Code (CLI, desktop, or IDE extension)
 - Python 3.8+ (standard library only)
 - [pandoc](https://pandoc.org/installing.html)
-- Chromium or Google Chrome (found on `PATH`, or in `/Applications` on macOS)
+- A XeLaTeX install, which pandoc uses as its PDF engine (`texlive-xetex` on Debian/Ubuntu), plus the `fvextra` and `xurl` LaTeX packages (`texlive-latex-extra` on Debian/Ubuntu), which wrap long lines
 
 Tested on Linux. macOS should work; Windows is untested.
 
@@ -28,18 +28,18 @@ git clone <this-repo-url> ~/.claude/skills/convo2pdf
 
 Start a new Claude Code session (or reload skills) and `/convo2pdf` will be available in every project.
 
-### Installing pandoc
+### Installing pandoc and XeLaTeX
 
-pandoc converts the transcript to HTML before the PDF step, so the skill won't run without it. Install it with your package manager:
+pandoc converts the Markdown copy of the transcript to PDF through XeLaTeX, so the skill won't run without both. Install them with your package manager:
 
 ```bash
-sudo apt install pandoc      # Debian, Ubuntu
-sudo dnf install pandoc      # Fedora
-sudo pacman -S pandoc        # Arch
-brew install pandoc          # macOS (Homebrew)
+sudo apt install pandoc texlive-xetex texlive-latex-extra   # Debian, Ubuntu
+sudo dnf install pandoc texlive-xetex texlive-fvextra texlive-xurl   # Fedora
+sudo pacman -S pandoc texlive-xetex texlive-latexextra      # Arch
+brew install pandoc && brew install --cask mactex-no-gui   # macOS (Homebrew)
 ```
 
-Other platforms and standalone installers are listed on the [pandoc install page](https://pandoc.org/installing.html). Check that it works with `pandoc --version`.
+Other platforms and standalone installers are listed on the [pandoc install page](https://pandoc.org/installing.html). Check that they work with `pandoc --version` and `xelatex --version`.
 
 ## Usage
 
@@ -77,7 +77,7 @@ Left out by default: tool calls and results, thinking, IDE context tags, system 
 
 - Everything runs locally. No network access is needed or used.
 - Exports contain your full conversation text. Check them before sharing, since conversations can include file contents, paths or secrets that came up along the way.
-- Transcripts can contain raw HTML (for example from fetched web pages). The PDF step blocks scripts and network requests with a Content-Security-Policy, so that content is printed, not run.
+- Transcripts can contain raw HTML (for example from fetched web pages). Raw HTML is dropped from the PDF, and raw LaTeX is disabled (`-raw_tex`), so LaTeX in a transcript is printed literally instead of being run by XeLaTeX.
 
 ## Development
 
@@ -85,12 +85,13 @@ Left out by default: tool calls and results, thinking, IDE context tags, system 
 python3 -m unittest discover -s tests -v
 ```
 
-Tests use a synthetic transcript in `tests/sample.jsonl`. The CLI tests are skipped if pandoc or a Chromium/Chrome browser is missing. See [CLAUDE.md](CLAUDE.md) for the code layout and conventions.
+Tests use a synthetic transcript in `tests/sample.jsonl`. The CLI tests are skipped if pandoc or xelatex is missing. See [CLAUDE.md](CLAUDE.md) for the code layout and conventions.
 
 ## Limitations
 
 - The transcript file format is an internal detail of Claude Code and may change between versions. If exports come out empty or garbled, please open an issue with your Claude Code version.
 - Images pasted into the conversation are not embedded.
+- The PDF uses XeLaTeX's default font, so characters it lacks (emoji, some symbols, CJK) can come out blank. Long lines in code blocks and inline code wrap at the margin (code blocks show a small arrow at each wrap). The `.md` copy always has the full text.
 - Very long tool output is truncated; use the `.md` or the raw transcript if you need everything.
 
 ## License

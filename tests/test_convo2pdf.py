@@ -1,4 +1,4 @@
-import subprocess, sys, unittest, tempfile, shutil
+import json, re, subprocess, sys, unittest, tempfile, shutil
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -24,14 +24,8 @@ class ParseTests(unittest.TestCase):
         for shown in ("pondering", "ls -la", "file1"):
             self.assertIn(shown, text)
 
-    def test_html_has_csp_and_table(self):
-        turns, title, ts = c.parse(SAMPLE, False, False)
-        html = c.render(turns, title, ts, SAMPLE)
-        self.assertIn("Content-Security-Policy", html)
-        self.assertIn("<table>", html)
 
-
-@unittest.skipUnless(shutil.which("pandoc") and c.find_browser(), "needs pandoc and Chromium/Chrome")
+@unittest.skipUnless(shutil.which("pandoc") and shutil.which("xelatex"), "needs pandoc and xelatex")
 class CliTests(unittest.TestCase):
     def run_cli(self, cwd, *args):
         return subprocess.run([sys.executable, str(SCRIPT), "--file", str(SAMPLE), *args],
@@ -48,6 +42,19 @@ class CliTests(unittest.TestCase):
             self.assertNotEqual(r.returncode, 0)
             self.assertIn("already exist", r.stderr)
             self.assertEqual((Path(d) / "my chat.md").read_text(), before)
+
+    def test_long_lines_stay_inside_margins(self):
+        with tempfile.TemporaryDirectory() as d:
+            src = Path(d) / "long.jsonl"
+            long = "x" * 400
+            body = f"`{'/a-b' * 60}`\n\n```\n{long}\n```\n\nhttps://example.com/{long}"
+            src.write_text('{"type":"user","message":{"content":%s}}\n' % json.dumps(body))
+            r = subprocess.run([sys.executable, str(SCRIPT), "--file", str(src), str(Path(d) / "o")], capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            if shutil.which("pdftotext"):
+                bbox = subprocess.run(["pdftotext", "-bbox", str(Path(d) / "o.pdf"), "-"], capture_output=True, text=True).stdout
+                xmax = max(float(m) for m in re.findall(r'xMax="([\d.]+)"', bbox))
+                self.assertLess(xmax, 595.3 - 72 + 1)  # A4 width minus 1in margin
 
 
 if __name__ == "__main__":
