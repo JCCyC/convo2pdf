@@ -15,13 +15,23 @@ class ParseTests(unittest.TestCase):
         text = c.to_markdown(turns, title, ts, SAMPLE)
         self.assertEqual(title, "Sample chat")
         self.assertIn("How do I list files?", text)
-        for hidden in ("secret/path.py", "hidden", "pondering", "ls -la", "file1", "SIDECHAIN"):
+        for hidden in ("secret/path.py", "hidden", "pondering", "ls -la", "file1", "SIDECHAIN", "SKILL-BODY", "Launching skill"):
             self.assertNotIn(hidden, text)
 
     def test_tools_and_thinking_flags(self):
         turns, title, ts = c.parse(SAMPLE, tools=True, thinking=True)
         text = c.to_markdown(turns, title, ts, SAMPLE)
         for shown in ("pondering", "ls -la", "file1"):
+            self.assertIn(shown, text)
+
+    def test_skill_calls_show_only_the_name_unless_skills_flag(self):
+        turns, title, ts = c.parse(SAMPLE, tools=False, thinking=False)
+        text = c.to_markdown(turns, title, ts, SAMPLE)
+        self.assertIn("`/demo --fast now`", text)
+        self.assertIn("`/init`", text)
+        turns, title, ts = c.parse(SAMPLE, tools=False, thinking=False, skills=True)
+        text = c.to_markdown(turns, title, ts, SAMPLE)
+        for shown in ("SLASH-SKILL-BODY", "TOOL-SKILL-BODY"):
             self.assertIn(shown, text)
 
 

@@ -6,3 +6,8 @@
 {"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "t1", "content": "file1\nfile2"}]}}
 {"type": "assistant", "isSidechain": true, "message": {"role": "assistant", "content": [{"type": "text", "text": "SIDECHAIN"}]}}
 {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "<script>alert(1)</script> Done."}]}}
+{"type": "user", "message": {"role": "user", "content": "<command-message>demo</command-message>\n<command-name>/demo</command-name>\n<command-args>--fast now</command-args>"}}
+{"type": "user", "isMeta": true, "message": {"role": "user", "content": [{"type": "text", "text": "Base directory for this skill: /x\n\nSLASH-SKILL-BODY"}]}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "tool_use", "id": "t2", "name": "Skill", "input": {"skill": "init"}}]}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "t2", "content": "Launching skill: init"}]}}
+{"type": "user", "isMeta": true, "message": {"role": "user", "content": [{"type": "text", "text": "TOOL-SKILL-BODY"}]}}

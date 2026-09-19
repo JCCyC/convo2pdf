@@ -44,7 +44,7 @@ Other platforms and standalone installers are listed on the [pandoc install page
 ## Usage
 
 ```
-/convo2pdf [basename] [--tools] [--thinking]
+/convo2pdf [basename] [--tools] [--thinking] [--skills]
 ```
 
 | Argument | Effect |
@@ -53,6 +53,7 @@ Other platforms and standalone installers are listed on the [pandoc install page
 | `basename` | Writes `<basename>.pdf` and `<basename>.md`. A `.pdf`/`.md` extension or a directory prefix is accepted; spaces are fine |
 | `--tools` | Also include tool calls and their output (each result truncated to 2000 characters) |
 | `--thinking` | Also include Claude's thinking blocks |
+| `--skills` | Also include the full prompt each skill call expands to (otherwise a skill call is just `/skillname`) |
 
 **It never overwrites.** If either output file already exists, nothing is written and you get an error naming the files in the way.
 
@@ -69,9 +70,9 @@ Without `--file` or `--session`, it uses the newest transcript for the current d
 
 ## What is and isn't included
 
-Included: your messages, Claude's replies, the conversation title and start time.
+Included: your messages, Claude's replies, skill calls as `/skillname`, the conversation title and start time.
 
-Left out by default: tool calls and results, thinking, IDE context tags, system reminders, and sub-agent (sidechain) messages.
+Left out by default: tool calls and results, thinking, skill prompts, IDE context tags, system reminders, and sub-agent (sidechain) messages.
 
 ## Privacy and safety
 
