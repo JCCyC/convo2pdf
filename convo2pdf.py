@@ -13,11 +13,13 @@ PROJECTS = Path.home() / ".claude" / "projects"
 NOISE = re.compile(r"<(system-reminder|ide_[a-z_]+|command-[a-z-]+|local-command-[a-z-]+)>.*?</\1>", re.S)
 
 # raw_tex is off: transcripts can contain LaTeX (or hostile \input) that must be printed, not run.
-# The header and Lua filter (next to this script) wrap long code lines, inline code and URLs at the margin.
+# The header and Lua filters (next to this script) wrap long code lines, inline code and URLs at the margin
+# and leave only http(s) links clickable.
 HERE = Path(__file__).resolve().parent
 PANDOC_PDF = ["--pdf-engine=xelatex", "-f", "markdown+lists_without_preceding_blankline+autolink_bare_uris-raw_tex",
               "-V", "geometry:margin=1in", "-V", "fontsize=11pt", "-V", "colorlinks=true", "-V", "papersize=a4",
-              "-H", str(HERE / "pdf-header.tex"), "--lua-filter", str(HERE / "pdf-code.lua")]
+              "-H", str(HERE / "pdf-header.tex"), "--lua-filter", str(HERE / "pdf-code.lua"),
+              "--lua-filter", str(HERE / "pdf-links.lua")]
 
 # Preferred fonts (VS Code preview look), first installed one wins; Windows fonts come last, and
 # Latin Modern (ships with TeX Live) is used when none is installed.

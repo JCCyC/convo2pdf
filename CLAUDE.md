@@ -10,7 +10,7 @@ Claude Code skill: `/convo2pdf` exports the current session transcript to `<name
 
 ## Pipeline
 
-`find_transcript` → `parse` (JSONL → list of `[role, markdown]` turns) → `to_markdown` (the `.md` output) → `pandoc <md> -o <pdf> --pdf-engine=xelatex` (flags in `PANDOC_PDF`), with `pdf-header.tex` (fvextra/xurl so code blocks and URLs wrap) and `pdf-code.lua` (inline code that can wrap) next to the script. The PDF is built from the `.md` file, so there is no HTML or CSS step.
+`find_transcript` → `parse` (JSONL → list of `[role, markdown]` turns) → `to_markdown` (the `.md` output) → `pandoc <md> -o <pdf> --pdf-engine=xelatex` (flags in `PANDOC_PDF`), with `pdf-header.tex` (fvextra/xurl so code blocks and URLs wrap) `pdf-code.lua` (inline code that can wrap) and `pdf-links.lua` (only http(s) links stay clickable) next to the script. The PDF is built from the `.md` file, so there is no HTML or CSS step.
 
 ## Commands
 

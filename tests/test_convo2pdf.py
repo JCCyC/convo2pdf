@@ -25,6 +25,19 @@ class ParseTests(unittest.TestCase):
             self.assertIn(shown, text)
 
 
+@unittest.skipUnless(shutil.which("pandoc"), "needs pandoc")
+class LinkTests(unittest.TestCase):
+    def test_only_http_links_stay_clickable(self):
+        md = "[a](src/x.ts#L4) [b](/etc/passwd) [c](file:///tmp/x) [d](#top) [e](HTTPS://example.com/e) [f](http://example.com/f) https://example.com/g"
+        filters = [a for a in c.PANDOC_PDF if a.endswith(".lua") and "links" in a]
+        out = subprocess.run(["pandoc", "-f", "markdown+autolink_bare_uris", "-t", "latex", "--lua-filter", filters[0]],
+                             input=md, capture_output=True, text=True).stdout
+        self.assertEqual(sorted(re.findall(r"\\(?:href|url)\{([^}]*)\}", out)),
+                         ["HTTPS://example.com/e", "http://example.com/f", "https://example.com/g"])
+        for text in ("a", "b", "c", "d"):
+            self.assertRegex(out, rf"(^|\s){text}(\s|$)")
+
+
 class FontTests(unittest.TestCase):
     def test_pick_fonts_returns_a_sans_and_mono_from_the_lists(self):
         args = dict(a.split("=", 1) for a in c.pick_fonts() if "=" in a)
