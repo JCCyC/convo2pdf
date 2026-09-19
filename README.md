@@ -91,7 +91,7 @@ Tests use a synthetic transcript in `tests/sample.jsonl`. The CLI tests are skip
 
 - The transcript file format is an internal detail of Claude Code and may change between versions. If exports come out empty or garbled, please open an issue with your Claude Code version.
 - Images pasted into the conversation are not embedded.
-- The PDF uses XeLaTeX's default font, so characters it lacks (emoji, some symbols, CJK) can come out blank. Long lines in code blocks and inline code wrap at the margin (code blocks show a small arrow at each wrap). The `.md` copy always has the full text.
+- The PDF uses the first installed sans-serif font from a preferred list (Segoe UI, Inter, Ubuntu, Noto Sans, …, then Windows fonts ending in Arial, and Latin Modern Sans if none is installed) and a matching monospace font, so characters they lack (emoji, some symbols, CJK) can come out blank. Long lines in code blocks and inline code wrap at the margin (code blocks show a small arrow at each wrap). The `.md` copy always has the full text.
 - Very long tool output is truncated; use the `.md` or the raw transcript if you need everything.
 
 ## License

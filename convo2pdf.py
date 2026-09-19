@@ -16,8 +16,22 @@ NOISE = re.compile(r"<(system-reminder|ide_[a-z_]+|command-[a-z-]+|local-command
 # The header and Lua filter (next to this script) wrap long code lines, inline code and URLs at the margin.
 HERE = Path(__file__).resolve().parent
 PANDOC_PDF = ["--pdf-engine=xelatex", "-f", "markdown+lists_without_preceding_blankline+autolink_bare_uris-raw_tex",
-              "-V", "geometry:margin=1in", "-V", "colorlinks=true", "-V", "papersize=a4",
+              "-V", "geometry:margin=1in", "-V", "fontsize=11pt", "-V", "colorlinks=true", "-V", "papersize=a4",
               "-H", str(HERE / "pdf-header.tex"), "--lua-filter", str(HERE / "pdf-code.lua")]
+
+# Preferred fonts (VS Code preview look), first installed one wins; Windows fonts come last, and
+# Latin Modern (ships with TeX Live) is used when none is installed.
+SANS = ["Segoe UI", "Inter", "Ubuntu", "Noto Sans", "Roboto", "Open Sans", "Lato", "Liberation Sans", "DejaVu Sans",
+        "Calibri", "Verdana", "Tahoma", "Trebuchet MS", "Arial"]
+MONO = ["Cascadia Mono", "JetBrains Mono", "Consolas", "Ubuntu Mono", "Noto Sans Mono", "Liberation Mono", "DejaVu Sans Mono",
+        "Lucida Console", "Courier New"]
+FALLBACK = ("Latin Modern Sans", "Latin Modern Mono")
+
+def pick_fonts():
+    r = subprocess.run(["fc-list", ":", "family"], capture_output=True, text=True) if shutil.which("fc-list") else None
+    have = {f.strip() for line in (r.stdout.splitlines() if r else []) for f in line.split(",")}
+    first = lambda names, default: next((n for n in names if n in have), default)
+    return ["-V", f"mainfont={first(SANS, FALLBACK[0])}", "-V", f"monofont={first(MONO, FALLBACK[1])}", "-V", "monofontoptions=Scale=MatchLowercase"]
 
 def find_transcript(a):
     if a.file: return Path(a.file)
@@ -110,7 +124,7 @@ def main():
                  + "Re-run with a different name, e.g. /convo2pdf " + base.name + "-2, or delete/rename the existing file(s).")
     if not base.parent.is_dir(): sys.exit(f"Folder does not exist: {base.parent}")
     md.write_text(to_markdown(turns, title, ts, path), encoding="utf-8")
-    r = subprocess.run(["pandoc", str(md), "-o", str(out), *PANDOC_PDF], capture_output=True, text=True)
+    r = subprocess.run(["pandoc", str(md), "-o", str(out), *PANDOC_PDF, *pick_fonts()], capture_output=True, text=True)
     if r.returncode or not out.exists():
         md.unlink(missing_ok=True)
         sys.exit(f"PDF generation failed:\n{r.stderr[-800:]}")

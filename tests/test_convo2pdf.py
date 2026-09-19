@@ -25,6 +25,13 @@ class ParseTests(unittest.TestCase):
             self.assertIn(shown, text)
 
 
+class FontTests(unittest.TestCase):
+    def test_pick_fonts_returns_a_sans_and_mono_from_the_lists(self):
+        args = dict(a.split("=", 1) for a in c.pick_fonts() if "=" in a)
+        self.assertIn(args["mainfont"], c.SANS + [c.FALLBACK[0]])
+        self.assertIn(args["monofont"], c.MONO + [c.FALLBACK[1]])
+
+
 @unittest.skipUnless(shutil.which("pandoc") and shutil.which("xelatex"), "needs pandoc and xelatex")
 class CliTests(unittest.TestCase):
     def run_cli(self, cwd, *args):
