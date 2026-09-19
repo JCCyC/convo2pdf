@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert a Claude Code session transcript (JSONL) to a PDF (via pandoc + xelatex).
 
-Usage: convo2pdf.py [basename] [--session ID | --file PATH] [--tools] [--thinking] [--skills]
+Usage: convo2pdf.py [basename] [--session ID | --file PATH] [--tools] [--thinking] [--skills] [--page-size a4|letter]
 Writes <basename>.pdf and <basename>.md; refuses to overwrite existing files.
 Defaults to the most recently modified transcript for the current directory's project.
 """
@@ -18,7 +18,7 @@ CMD = re.compile(r"<command-name>\s*/?([^<\s]+)\s*</command-name>(?:.*?<command-
 # and leave only http(s) links clickable.
 HERE = Path(__file__).resolve().parent
 PANDOC_PDF = ["--pdf-engine=xelatex", "-f", "markdown+lists_without_preceding_blankline+autolink_bare_uris-raw_tex",
-              "-V", "geometry:margin=1in", "-V", "fontsize=11pt", "-V", "colorlinks=true", "-V", "papersize=a4",
+              "-V", "geometry:margin=1in", "-V", "fontsize=11pt", "-V", "colorlinks=true",
               "-H", str(HERE / "pdf-header.tex"), "--lua-filter", str(HERE / "pdf-code.lua"),
               "--lua-filter", str(HERE / "pdf-links.lua")]
 
@@ -122,6 +122,7 @@ def main():
     ap.add_argument("--tools", action="store_true", help="include tool calls and results")
     ap.add_argument("--thinking", action="store_true", help="include thinking blocks")
     ap.add_argument("--skills", action="store_true", help="include the full prompt of each skill call")
+    ap.add_argument("--page-size", type=str.lower, choices=["a4", "letter"], default="a4", help="PDF page size (default: a4)")
     a = ap.parse_args()
     if not shutil.which("pandoc"): sys.exit("pandoc is required but not found on PATH (https://pandoc.org/installing.html).")
     if not shutil.which("xelatex"): sys.exit("xelatex is required but not found on PATH (install texlive-xetex).")
@@ -141,7 +142,7 @@ def main():
                  + "Re-run with a different name, e.g. /convo2pdf " + base.name + "-2, or delete/rename the existing file(s).")
     if not base.parent.is_dir(): sys.exit(f"Folder does not exist: {base.parent}")
     md.write_text(to_markdown(turns, title, ts, path), encoding="utf-8")
-    r = subprocess.run(["pandoc", str(md), "-o", str(out), *PANDOC_PDF, *pick_fonts()], capture_output=True, text=True)
+    r = subprocess.run(["pandoc", str(md), "-o", str(out), *PANDOC_PDF, "-V", f"papersize={a.page_size}", *pick_fonts()], capture_output=True, text=True)
     if r.returncode or not out.exists():
         md.unlink(missing_ok=True)
         sys.exit(f"PDF generation failed:\n{r.stderr[-800:]}")

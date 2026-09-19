@@ -86,6 +86,17 @@ class CliTests(unittest.TestCase):
                 xmax = max(float(m) for m in re.findall(r'xMax="([\d.]+)"', bbox))
                 self.assertLess(xmax, 595.3 - 72 + 1)  # A4 width minus 1in margin
 
+    def test_page_size_option(self):
+        if not shutil.which("pdfinfo"): self.skipTest("needs pdfinfo")
+        for args, size in (((), "595"), (("--page-size", "a4"), "595"), (("--page-size", "Letter"), "612")):
+            with tempfile.TemporaryDirectory() as d:
+                r = self.run_cli(d, "o", *args)
+                self.assertEqual(r.returncode, 0, r.stderr)
+                info = subprocess.run(["pdfinfo", str(Path(d) / "o.pdf")], capture_output=True, text=True).stdout
+                self.assertRegex(info, rf"Page size:\s+{size}")
+        r = self.run_cli(tempfile.gettempdir(), "x", "--page-size", "legal")
+        self.assertNotEqual(r.returncode, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -44,7 +44,7 @@ Other platforms and standalone installers are listed on the [pandoc install page
 ## Usage
 
 ```
-/convo2pdf [basename] [--tools] [--thinking] [--skills]
+/convo2pdf [basename] [--tools] [--thinking] [--skills] [--page-size a4|letter]
 ```
 
 | Argument | Effect |
@@ -54,6 +54,7 @@ Other platforms and standalone installers are listed on the [pandoc install page
 | `--tools` | Also include tool calls and their output (each result truncated to 2000 characters) |
 | `--thinking` | Also include Claude's thinking blocks |
 | `--skills` | Also include the full prompt each skill call expands to (otherwise a skill call is just `/skillname`) |
+| `--page-size a4\|letter` | PDF page size (default `a4`) |
 
 **It never overwrites.** If either output file already exists, nothing is written and you get an error naming the files in the way.
 
